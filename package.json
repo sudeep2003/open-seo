@@ -56,6 +56,18 @@
     "seed:projects": "tsx scripts/seed-projects.ts",
     "ci:check": "prettier --check . && knip && tsc --noEmit && tsc --noEmit -p tests/badseo/tsconfig.json && oxlint . --type-aware && pnpm sync-plugin-skills && test -z \"$(git status --porcelain -- plugins/openseo/skills)\""
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@mongodb-js/zstd",
+      "core-js",
+      "core-js-pure",
+      "esbuild",
+      "msgpackr-extract",
+      "node-liblzma",
+      "sharp",
+      "workerd"
+    ]
+  },
   "cloudflare": {
     "bindings": {
       "AUTH_MODE": {
