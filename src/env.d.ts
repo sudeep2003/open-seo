@@ -78,10 +78,18 @@ declare namespace Cloudflare {
       }
     >;
 
-    // OpenRouter API key for the SAM in-app chat agent.
+    // LLM gateway for the AI features: "openrouter" (default) or "vercel".
+    // Validated in src/shared/ai-gateway.ts.
+    AI_GATEWAY?: string;
+    // OpenRouter API key for the AI features (SAM, website research, prompt
+    // suggestions).
     OPENROUTER_API_KEY?: string;
-    // Optional OpenRouter model slug override (defaults in openrouter.ts).
+    // Optional OpenRouter model slug override (defaults in aiGateway.ts).
     OPENROUTER_MODEL?: string;
+    // Vercel AI Gateway API key, used when AI_GATEWAY=vercel.
+    AI_GATEWAY_API_KEY?: string;
+    // Optional Vercel AI Gateway model override (defaults in aiGateway.ts).
+    AI_GATEWAY_MODEL?: string;
   }
 }
 

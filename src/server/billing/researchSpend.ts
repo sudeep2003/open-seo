@@ -4,10 +4,11 @@ import {
   type BillingCustomerContext,
 } from "./subscription";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
+import type { AiGatewayName } from "@/shared/ai-gateway";
 import type { CreditFeature } from "@/shared/billing-credit-features";
 
 export type ResearchSpend = {
-  provider: "openrouter" | "dataforseo";
+  provider: AiGatewayName | "dataforseo";
   creditFeature: CreditFeature;
   operation: string;
   costUsd: number;

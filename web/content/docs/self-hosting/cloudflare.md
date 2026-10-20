@@ -56,7 +56,7 @@ pnpm deploy:selfhost --yes
 
 This provisions the D1 database, KV namespaces, and R2 bucket, applies the database migrations, deploys the Worker, and creates the Cloudflare Access application protecting it (allowing exactly `ACCESS_ALLOWED_EMAILS`). If the account has no Zero Trust team yet, one is created for you, named after your workers.dev subdomain.
 
-AI Visibility uses your `DATAFORSEO_API_KEY`; tracked questions are sent to DataForSEO and billed directly by the provider. Set `OPENROUTER_API_KEY` for setup research and generated prompt suggestions. Deployment configures background collection and a five-minute cron that dispatches due daily, weekly, or monthly checks. The app shows the collection cost before a check or schedule starts. See the [AI Visibility guide](/docs/ai-visibility).
+AI Visibility uses your `DATAFORSEO_API_KEY`; tracked questions are sent to DataForSEO and billed directly by the provider. Set your [AI gateway](#ai-gateway) key for setup research and generated prompt suggestions. Deployment configures background collection and a five-minute cron that dispatches due daily, weekly, or monthly checks. The app shows the collection cost before a check or schedule starts. See the [AI Visibility guide](/docs/ai-visibility).
 
 ## 5) Validate setup
 
@@ -65,6 +65,19 @@ AI Visibility uses your `DATAFORSEO_API_KEY`; tracked questions are sent to Data
 3. OpenSEO should load after login.
 
 If login fails, re-check `ACCESS_ALLOWED_EMAILS` and redeploy.
+
+## AI gateway
+
+SAM (the in-app SEO agent), website research, and AI Visibility prompt suggestions call an LLM through an AI gateway. Set `AI_GATEWAY` in `.env.selfhost` to choose one, then add that gateway's key:
+
+| `AI_GATEWAY` | API key | Optional model override |
+| --- | --- | --- |
+| `openrouter` (default when unset) | `OPENROUTER_API_KEY` | `OPENROUTER_MODEL` |
+| `vercel` | `AI_GATEWAY_API_KEY` | `AI_GATEWAY_MODEL` |
+
+Create an OpenRouter key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys), or a Vercel AI Gateway key on the [AI Gateway API Keys page](https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai-gateway%2Fapi-keys&title=AI+Gateway+API+Keys) of your Vercel dashboard. Both gateways default to `openai/gpt-5.6-luna`, and you pay the gateway directly. Without the selected gateway's key, the AI features stay off and the rest of OpenSEO still works.
+
+Then run `pnpm deploy:selfhost --yes` again. Keep these values in `.env.selfhost` rather than the Cloudflare dashboard, because each deploy resets the Worker's variables.
 
 ## Connect the MCP server through Cloudflare Access
 

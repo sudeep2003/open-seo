@@ -40,12 +40,16 @@ describe("SamTurnStats", () => {
   it("sums steps and tool calls into the turn event, counting {error} outputs as failures", () => {
     const stats = new SamTurnStats();
     // Each generation is linked to the turn as its trace.
-    expect(stats.recordStep(step(), 0.01)).toMatchObject({
+    expect(stats.recordStep(step(), 0.01, "openrouter")).toMatchObject({
       $ai_trace_id: stats.turnId,
       $ai_parent_id: stats.turnId,
       $ai_model: "openai/gpt-5.6-luna",
     });
-    stats.recordStep(step({ toolCalls: [], finishReason: "stop" }), 0.02);
+    stats.recordStep(
+      step({ toolCalls: [], finishReason: "stop" }),
+      0.02,
+      "openrouter",
+    );
     stats.recordSpend(0.03);
     stats.recordToolCall(toolCall());
     stats.recordToolCall(
@@ -92,7 +96,7 @@ describe("SamTelemetry billing completion", () => {
         },
       );
       const first = telemetry.beginTurn(false);
-      first.recordStep(step(), 0.01);
+      first.recordStep(step(), 0.01, "openrouter");
       let finishBilling!: () => void;
       const billing = new Promise<void>((resolve) => {
         finishBilling = () => {

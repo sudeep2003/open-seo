@@ -1,4 +1,5 @@
 import { AUTH_MODES } from "@/lib/auth-mode";
+import { AI_GATEWAY_ENV, parseAiGateway } from "@/shared/ai-gateway";
 import {
   looksLikeDataForSeoKey,
   MIN_BETTER_AUTH_SECRET_LENGTH,
@@ -195,22 +196,7 @@ function checkOptionalFeatures(env: EnvRecord, items: PreflightItem[]): void {
     });
   }
 
-  items.push(
-    get(env, "OPENROUTER_API_KEY")
-      ? {
-          key: "ai",
-          name: "AI features",
-          level: "ok",
-          message: "OPENROUTER_API_KEY set",
-        }
-      : {
-          key: "ai",
-          name: "AI features",
-          level: "info",
-          message:
-            "OPENROUTER_API_KEY not set (optional) — SAM, the in-app SEO agent, is disabled.",
-        },
-  );
+  items.push(checkAiGateway(env));
 
   items.push(
     get(env, "CONTEXT_API_KEY")
@@ -228,6 +214,27 @@ function checkOptionalFeatures(env: EnvRecord, items: PreflightItem[]): void {
             'CONTEXT_API_KEY not set (optional) — on Docker the site audit "Render JavaScript" option is disabled; on Cloudflare, Browser Run renders without a fallback.',
         },
   );
+}
+
+function checkAiGateway(env: EnvRecord): PreflightItem {
+  const parsed = parseAiGateway(get(env, "AI_GATEWAY"));
+  if (!parsed.ok) {
+    return {
+      key: "ai",
+      name: "AI features",
+      level: "warn",
+      message: `${parsed.message} SAM, the in-app SEO agent, is disabled.`,
+    };
+  }
+  const apiKey = AI_GATEWAY_ENV[parsed.gateway].apiKey;
+  return get(env, apiKey)
+    ? { key: "ai", name: "AI features", level: "ok", message: `${apiKey} set` }
+    : {
+        key: "ai",
+        name: "AI features",
+        level: "info",
+        message: `${apiKey} not set (optional) — SAM, the in-app SEO agent, is disabled.`,
+      };
 }
 
 // Shared per-feature checks: the Docker preflight prints these at boot and

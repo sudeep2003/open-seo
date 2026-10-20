@@ -34,6 +34,7 @@ import { Route as RReportIdRouteImport } from './routes/r/$reportId'
 import { Route as AppBillingFixPaymentRouteImport } from './routes/_app/billing_.fix-payment'
 import { Route as AppHelpDataforseoApiKeyRouteImport } from './routes/_app/help/dataforseo-api-key'
 import { Route as AppHelpOpenrouterApiKeyRouteImport } from './routes/_app/help/openrouter-api-key'
+import { Route as AppHelpVercelAiGatewayApiKeyRouteImport } from './routes/_app/help/vercel-ai-gateway-api-key'
 import { Route as AppPProjectIdRouteRouteImport } from './routes/_app/p/$projectId/route'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
 import { Route as AppSettingsOrganizationRouteImport } from './routes/_app/settings/organization'
@@ -196,6 +197,12 @@ const AppHelpOpenrouterApiKeyRoute = AppHelpOpenrouterApiKeyRouteImport.update({
   path: '/help/openrouter-api-key',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppHelpVercelAiGatewayApiKeyRoute =
+  AppHelpVercelAiGatewayApiKeyRouteImport.update({
+    id: '/help/vercel-ai-gateway-api-key',
+    path: '/help/vercel-ai-gateway-api-key',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppPProjectIdRouteRoute = AppPProjectIdRouteRouteImport.update({
   id: '/p/$projectId',
   path: '/p/$projectId',
@@ -424,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/billing/fix-payment': typeof AppBillingFixPaymentRoute
   '/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
+  '/help/vercel-ai-gateway-api-key': typeof AppHelpVercelAiGatewayApiKeyRoute
   '/settings/organization': typeof AppSettingsOrganizationRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/autumn/$': typeof ApiAutumnSplatRoute
@@ -483,6 +491,7 @@ export interface FileRoutesByTo {
   '/billing/fix-payment': typeof AppBillingFixPaymentRoute
   '/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
+  '/help/vercel-ai-gateway-api-key': typeof AppHelpVercelAiGatewayApiKeyRoute
   '/settings/organization': typeof AppSettingsOrganizationRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/autumn/$': typeof ApiAutumnSplatRoute
@@ -545,6 +554,7 @@ export interface FileRoutesById {
   '/_app/billing_/fix-payment': typeof AppBillingFixPaymentRoute
   '/_app/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/_app/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
+  '/_app/help/vercel-ai-gateway-api-key': typeof AppHelpVercelAiGatewayApiKeyRoute
   '/_app/settings/organization': typeof AppSettingsOrganizationRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/autumn/$': typeof ApiAutumnSplatRoute
@@ -608,6 +618,7 @@ export interface FileRouteTypes {
     | '/billing/fix-payment'
     | '/help/dataforseo-api-key'
     | '/help/openrouter-api-key'
+    | '/help/vercel-ai-gateway-api-key'
     | '/settings/organization'
     | '/api/auth/$'
     | '/api/autumn/$'
@@ -667,6 +678,7 @@ export interface FileRouteTypes {
     | '/billing/fix-payment'
     | '/help/dataforseo-api-key'
     | '/help/openrouter-api-key'
+    | '/help/vercel-ai-gateway-api-key'
     | '/settings/organization'
     | '/api/auth/$'
     | '/api/autumn/$'
@@ -728,6 +740,7 @@ export interface FileRouteTypes {
     | '/_app/billing_/fix-payment'
     | '/_app/help/dataforseo-api-key'
     | '/_app/help/openrouter-api-key'
+    | '/_app/help/vercel-ai-gateway-api-key'
     | '/_app/settings/organization'
     | '/api/auth/$'
     | '/api/autumn/$'
@@ -962,6 +975,13 @@ declare module '@tanstack/react-router' {
       path: '/help/openrouter-api-key'
       fullPath: '/help/openrouter-api-key'
       preLoaderRoute: typeof AppHelpOpenrouterApiKeyRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/help/vercel-ai-gateway-api-key': {
+      id: '/_app/help/vercel-ai-gateway-api-key'
+      path: '/help/vercel-ai-gateway-api-key'
+      fullPath: '/help/vercel-ai-gateway-api-key'
+      preLoaderRoute: typeof AppHelpVercelAiGatewayApiKeyRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/p/$projectId': {
@@ -1351,6 +1371,7 @@ interface AppRouteRouteChildren {
   AppBillingFixPaymentRoute: typeof AppBillingFixPaymentRoute
   AppHelpDataforseoApiKeyRoute: typeof AppHelpDataforseoApiKeyRoute
   AppHelpOpenrouterApiKeyRoute: typeof AppHelpOpenrouterApiKeyRoute
+  AppHelpVercelAiGatewayApiKeyRoute: typeof AppHelpVercelAiGatewayApiKeyRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
@@ -1364,6 +1385,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppBillingFixPaymentRoute: AppBillingFixPaymentRoute,
   AppHelpDataforseoApiKeyRoute: AppHelpDataforseoApiKeyRoute,
   AppHelpOpenrouterApiKeyRoute: AppHelpOpenrouterApiKeyRoute,
+  AppHelpVercelAiGatewayApiKeyRoute: AppHelpVercelAiGatewayApiKeyRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(

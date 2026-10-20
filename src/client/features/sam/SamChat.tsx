@@ -117,12 +117,13 @@ export function SamChat({
     );
   }
 
-  // SAM cannot answer a turn without OPENROUTER_API_KEY, so surface setup
+  // SAM cannot answer a turn without the AI gateway's key, so surface setup
   // instructions instead of letting a chat fail mid-stream (self-hosted only).
   if (access.status === "setup") {
     return (
       <StatusScreen size="lg">
         <SamSetupGate
+          gateway={access.gateway}
           errorMessage={access.errorMessage}
           isRefetching={access.isRefetching}
           onRetry={access.onRetry}
