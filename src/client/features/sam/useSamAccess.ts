@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
 import { getSamAccessSetupStatus } from "@/serverFunctions/samAccess";
+import type { AiGatewayName } from "@/shared/ai-gateway";
 
-// Fails closed: the chat only renders once the check confirms the OpenRouter
+// Fails closed: the chat only renders once the check confirms the AI gateway
 // key is set. A failed check is an error with retry, not the key-missing gate.
 type SamAccess =
   | { status: "ready" }
@@ -16,13 +17,14 @@ type SamAccess =
     }
   | {
       status: "setup";
+      gateway: AiGatewayName;
       errorMessage: string | null;
       isRefetching: boolean;
       onRetry: () => void;
     };
 
 export function useSamAccess(projectId: string): SamAccess {
-  // Hosted deployments always have OPENROUTER_API_KEY provisioned (the server
+  // Hosted deployments always have their AI gateway key provisioned (the server
   // function short-circuits to enabled), so skip the round-trip entirely.
   const isHosted = isHostedClientAuthMode();
 
@@ -45,6 +47,7 @@ export function useSamAccess(projectId: string): SamAccess {
   if (data.enabled) return { status: "ready" };
   return {
     status: "setup",
+    gateway: data.gateway,
     errorMessage:
       data.errorMessage ??
       (error

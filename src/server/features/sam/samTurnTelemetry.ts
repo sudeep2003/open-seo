@@ -5,6 +5,7 @@ import type {
 } from "@cloudflare/think";
 import type { UIMessage } from "ai";
 import { captureServerError, captureServerEvent } from "@/server/lib/posthog";
+import type { AiGatewayName } from "@/shared/ai-gateway";
 
 type SamTurnStatus =
   | "completed"
@@ -43,6 +44,7 @@ export class SamTurnStats {
   refusal: SamRefusalReason | null = null;
   reported = false;
   model: string | null = null;
+  provider: AiGatewayName | null = null;
   steps = 0;
   inputTokens = 0;
   outputTokens = 0;
@@ -61,7 +63,11 @@ export class SamTurnStats {
    * recorded separately (recordSpend) because compaction summaries spend
    * outside the step loop.
    */
-  recordStep(ctx: StepContext, costUsd: number): Record<string, unknown> {
+  recordStep(
+    ctx: StepContext,
+    costUsd: number,
+    provider: AiGatewayName,
+  ): Record<string, unknown> {
     const now = Date.now();
     const latencySeconds = (now - this.lastStepEndedAt) / 1000;
     this.lastStepEndedAt = now;
@@ -71,6 +77,7 @@ export class SamTurnStats {
     const cached =
       usage.inputTokenDetails.cacheReadTokens ?? usage.cachedInputTokens ?? 0;
     this.model = ctx.response.modelId;
+    this.provider = provider;
     this.steps += 1;
     this.inputTokens += usage.inputTokens ?? 0;
     this.outputTokens += usage.outputTokens ?? 0;
@@ -81,7 +88,7 @@ export class SamTurnStats {
       $ai_parent_id: this.turnId,
       $ai_span_id: crypto.randomUUID(),
       $ai_span_name: `step ${this.steps}`,
-      $ai_provider: "openrouter",
+      $ai_provider: provider,
       $ai_model: ctx.response.modelId,
       $ai_input_tokens: usage.inputTokens ?? 0,
       $ai_output_tokens: usage.outputTokens ?? 0,
@@ -138,7 +145,7 @@ export class SamTurnStats {
     return {
       $ai_trace_id: this.turnId,
       $ai_span_name: "sam_turn",
-      $ai_provider: "openrouter",
+      $ai_provider: this.provider,
       $ai_model: this.model,
       $ai_latency: (Date.now() - this.startedAt) / 1000,
       $ai_is_error: status === "error",
@@ -205,12 +212,12 @@ export class SamTelemetry {
     if (this.current) this.current.compactions += 1;
   }
 
-  step(ctx: StepContext, costUsd: number): void {
+  step(ctx: StepContext, costUsd: number, provider: AiGatewayName): void {
     const turn = this.current;
     // Refusals answer through the canned model: no provider call to trace.
     if (!turn || turn.refusal) return;
     this.waitUntil(
-      this.capture("$ai_generation", turn.recordStep(ctx, costUsd)),
+      this.capture("$ai_generation", turn.recordStep(ctx, costUsd, provider)),
     );
   }
 

@@ -41,7 +41,7 @@ Optional env values:
 - `AUTH_MODE=local_noauth` (already set in compose)
 - `OPEN_SEO_IMAGE` (defaults to `ghcr.io/every-app/open-seo:latest`)
 
-AI Visibility uses your `DATAFORSEO_API_KEY` and sends tracked questions to DataForSEO. Set `OPENROUTER_API_KEY` for setup research and generated prompt suggestions. You pay providers directly; the app shows the collection cost before a check or schedule starts. Keep the container running for background answers and daily, weekly, or monthly tracking. The built-in scheduler checks for due work every five minutes; no host cron setup is required. See the [AI Visibility guide](/docs/ai-visibility).
+AI Visibility uses your `DATAFORSEO_API_KEY` and sends tracked questions to DataForSEO. Set your [AI gateway](#ai-gateway) key for setup research and generated prompt suggestions. You pay providers directly; the app shows the collection cost before a check or schedule starts. Keep the container running for background answers and daily, weekly, or monthly tracking. The built-in scheduler checks for due work every five minutes; no host cron setup is required. See the [AI Visibility guide](/docs/ai-visibility).
 
 If you are putting Docker behind a reverse proxy or a temporary tunnel, remember that Docker self-hosting runs with app auth disabled. Only expose it behind your own auth-protected reverse proxy, tunnel, or private network, and add the public hostname before restarting:
 
@@ -50,6 +50,19 @@ ALLOWED_HOST=yourdomain.com docker compose up -d
 ```
 
 You can also persist it in `.env`.
+
+## AI gateway
+
+SAM (the in-app SEO agent), website research, and AI Visibility prompt suggestions call an LLM through an AI gateway. Set `AI_GATEWAY` in `.env` to choose one, then add that gateway's key:
+
+| `AI_GATEWAY` | API key | Optional model override |
+| --- | --- | --- |
+| `openrouter` (default when unset) | `OPENROUTER_API_KEY` | `OPENROUTER_MODEL` |
+| `vercel` | `AI_GATEWAY_API_KEY` | `AI_GATEWAY_MODEL` |
+
+Create an OpenRouter key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys), or a Vercel AI Gateway key on the [AI Gateway API Keys page](https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai-gateway%2Fapi-keys&title=AI+Gateway+API+Keys) of your Vercel dashboard. Both gateways default to `openai/gpt-5.6-luna`, and you pay the gateway directly. Without the selected gateway's key, the AI features stay off and the rest of OpenSEO still works.
+
+Apply changes with `docker compose up -d --force-recreate open-seo`.
 
 ## Telemetry
 

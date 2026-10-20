@@ -19,10 +19,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, withPgClient } from "@/db";
 import { user } from "@/db/schema";
-import {
-  openRouterCostUsd,
-  staticAssistantModel,
-} from "@/server/lib/chatAgent";
+import { staticAssistantModel } from "@/server/lib/chatAgent";
 import { SamSessionRepository } from "@/server/features/sam/SamSessionRepository";
 import { ProjectContextService } from "@/server/features/project-context/services/ProjectContextService";
 import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
@@ -32,11 +29,13 @@ import {
   SamTelemetry,
   type SamTurnStats,
 } from "@/server/features/sam/samTurnTelemetry";
-import { buildChatAgentModel } from "@/server/lib/openrouter";
 import {
-  getEnvValueSync,
-  isHostedServerAuthMode,
-} from "@/server/lib/runtime-env";
+  aiGatewayConfigFromEnv,
+  aiGatewayName,
+  buildChatAgentModel,
+  gatewayCostUsd,
+} from "@/server/lib/aiGateway";
+import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import {
   checkUsageCreditsDepleted,
   trackUsageCreditSpend,
@@ -54,7 +53,7 @@ const PROJECT_CONTEXT_BLOCK = "project_context";
 const PUBLIC_ORIGIN_KEY = "sam-public-origin";
 
 // Batching threshold for metering, not a charge: the user pays the turn's
-// actual OpenRouter cost (times the usual markup) whatever this is set to.
+// actual gateway cost (times the usual markup) whatever this is set to.
 // Spend accumulates step by step and is sent to Autumn once the unbilled
 // total reaches this much, with the remainder flushed when the turn ends —
 // so a $0.50 turn is ~10 Autumn calls rather than one per step, and a turn
@@ -136,11 +135,11 @@ export class SamChatAgent extends Think {
   private samContext: SamContext | null = null;
 
   // Per-turn billing state: beforeTurn arms it (non-null = hosted mode, meter
-  // this turn), onStepFinish accumulates OpenRouter cost and meters it in
+  // this turn), onStepFinish accumulates gateway cost and meters it in
   // chunks as the turn runs, onChatResponse/onChatError flush the remainder.
   // Chunked per step rather than once per turn so a turn the Durable Object
   // memory limit kills mid-way still bills what it spent — the Sep 2026
-  // recovery loop burned ~$160/day of OpenRouter spend that never reached
+  // recovery loop burned ~$160/day of LLM spend that never reached
   // onChatResponse. Deductions run off the inference loop, serialized so they
   // land in order; waitUntil keeps the final flush alive in the background.
   private turnUnbilledUsd = 0;
@@ -194,13 +193,8 @@ export class SamChatAgent extends Think {
   }
 
   private buildModel(reasoningEffort: "max" | "low") {
-    const apiKey = getEnvValueSync(this.env, "OPENROUTER_API_KEY");
-    if (!apiKey) {
-      throw new Error("OPENROUTER_API_KEY is required for the SAM agent");
-    }
     return buildChatAgentModel(
-      apiKey,
-      getEnvValueSync(this.env, "OPENROUTER_MODEL"),
+      aiGatewayConfigFromEnv(this.env),
       reasoningEffort,
     );
   }
@@ -238,7 +232,7 @@ export class SamChatAgent extends Think {
       model: this.buildModel("low"),
       prompt,
     });
-    this.recordSpend(openRouterCostUsd(result.providerMetadata));
+    this.recordSpend(gatewayCostUsd(result.providerMetadata));
     this.telemetry.compaction();
     return result.text;
   }
@@ -397,9 +391,9 @@ export class SamChatAgent extends Think {
   }
 
   onStepFinish(ctx: StepContext): void {
-    const costUsd = openRouterCostUsd(ctx.providerMetadata);
+    const costUsd = gatewayCostUsd(ctx.providerMetadata);
     this.recordSpend(costUsd);
-    this.telemetry.step(ctx, costUsd);
+    this.telemetry.step(ctx, costUsd, aiGatewayName(this.env));
   }
 
   // Add spend to the turn's unbilled total and meter it once a chunk has
@@ -443,7 +437,7 @@ export class SamChatAgent extends Think {
       creditFeature: "agent",
       costUsd,
       monthlyRemaining: this.turnMonthlyRemaining ?? armedMonthlyRemaining,
-      properties: { provider: "openrouter", turn_id: turn?.turnId },
+      properties: { provider: aiGatewayName(this.env), turn_id: turn?.turnId },
     });
     if (turn) turn.credits += monthlyCredits + topupCredits;
     if (this.turnMonthlyRemaining !== null)
@@ -515,7 +509,7 @@ export class SamChatAgent extends Think {
   // tool-heavy turn under GPT-5.6 Luna at max reasoning), every re-run dies at
   // the same point, and the bookkeeping that bounds the retry budget dies with
   // it — one incident was observed at attempt 44 of a max of 10. Each attempt
-  // is a full OpenRouter call that never reaches onChatResponse, so none of it
+  // is a full model call that never reaches onChatResponse, so none of it
   // is metered: in early Sep 2026 these loops were ~95% of the key's spend.
   // Keep the durable bookkeeping (partial reply persisted) but never re-run
   // inference automatically; the user resends instead. Skipped recoveries

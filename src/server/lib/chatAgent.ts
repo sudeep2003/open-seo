@@ -1,6 +1,5 @@
-import type { LanguageModelV3 } from "@openrouter/ai-sdk-provider";
+import type { LanguageModelV3 } from "@/server/lib/aiGateway";
 import { subscribe } from "agents/observability";
-import { z } from "zod";
 
 // The chat agent's most common failure modes — a provider stream dying
 // mid-turn ("chat:request:failed", stage "stream") and a DO restart whose
@@ -22,22 +21,6 @@ subscribe("chat", (event) => {
     );
   }
 });
-
-// OpenRouter (with usage accounting on) reports the real USD cost of each
-// response under providerMetadata.openrouter.usage.cost. Used by SAM to meter
-// LLM spend against the credit pool.
-const openRouterUsageSchema = z.object({
-  openrouter: z.object({ usage: z.object({ cost: z.number() }) }),
-});
-
-export function openRouterCostUsd(providerMetadata: unknown): number {
-  const parsed = openRouterUsageSchema.safeParse(providerMetadata);
-  return parsed.success ? parsed.data.openrouter.usage.cost : 0;
-}
-
-export function requireOpenRouterCostUsd(providerMetadata: unknown): number {
-  return openRouterUsageSchema.parse(providerMetadata).openrouter.usage.cost;
-}
 
 // The provider package re-exports only LanguageModelV3 itself, so the stream
 // shape is derived from the interface.

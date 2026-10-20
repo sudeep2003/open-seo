@@ -52,7 +52,7 @@ Every billable hosted DataForSEO call uses createDataforseoClient with organizat
 
 ### Billing fails closed
 
-Applies to: `src/shared/billing*.ts`, `src/shared/rank-tracking.ts`, `src/server.ts`, `src/server/billing/**`, `src/server/lib/chatAgent.ts`, `src/server/lib/dataforseoBillingClassification.ts`, `src/server/lib/openrouter.ts`, `src/server/lib/audit/lighthouse.ts`, `src/server/lib/dataforseo/**`, `src/server/features/**`, `src/server/mcp/**`, `src/server/workflows/**`, `src/serverFunctions/**`, `src/routes/api/autumn/**`.
+Applies to: `src/shared/billing*.ts`, `src/shared/rank-tracking.ts`, `src/server.ts`, `src/server/billing/**`, `src/server/lib/chatAgent.ts`, `src/server/lib/dataforseoBillingClassification.ts`, `src/server/lib/aiGateway.ts`, `src/server/lib/audit/lighthouse.ts`, `src/server/lib/dataforseo/**`, `src/server/features/**`, `src/server/mcp/**`, `src/server/workflows/**`, `src/serverFunctions/**`, `src/routes/api/autumn/**`.
 
 Every billable hosted provider path must check organization credits before paid execution and meter provider-reported spend through the established shared credit-spend helper after execution. A failed gate prevents the paid call. A bounded partial-success API may surface a failed billing check as an explicit item-level error, but it must not present the paid operation as successful. Authorization failures terminate the request. Never use a stale-positive cache that can authorize access or spend that a live check would deny, and ensure retries or Workflow replays cannot omit metering or double-charge.
 

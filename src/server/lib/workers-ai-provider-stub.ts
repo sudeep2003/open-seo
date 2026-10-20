@@ -6,14 +6,14 @@
  * openai + @ai-sdk/anthropic providers they pull in) solely to build its lazy
  * default provider in `resolveModel()` — which only runs when `getModel()`
  * returns a bare model-id string. Our chat agent (SamChatAgent) returns a
- * constructed OpenRouter LanguageModel instead, so the default provider is
+ * constructed AI gateway LanguageModel instead, so the default provider is
  * dead code; this stub keeps it out of the eager worker bundle. Same pattern
  * as just-bash-stub.ts.
  */
 const STUBBED_MESSAGE =
   "workers-ai-provider is stubbed out of the worker bundle to keep it out of " +
   "the eager isolate startup graph (see vite-plugin-lean-worker-bundle.ts); " +
-  "SamChatAgent overrides getModel with OpenRouter";
+  "SamChatAgent overrides getModel with the configured AI gateway";
 
 // Covers every named import in the dependency graph: `createWorkersAI` (root),
 // `anthropic` (/anthropic) and `openai` (/openai).
