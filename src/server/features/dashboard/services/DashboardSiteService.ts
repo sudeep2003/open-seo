@@ -106,6 +106,7 @@ async function getKeywords(projectId: string, organizationId: string) {
       endDate: z.string(),
     }),
     maxAgeMs: 86400_000,
+    shouldCache: (value) => value.connected,
     load: async () => {
       try {
         const result = await GscService.getPerformance({
@@ -180,6 +181,7 @@ async function getEmergingQueries(projectId: string, organizationId: string) {
     },
     schema: queriesSchema,
     maxAgeMs: 86400_000,
+    shouldCache: (value) => value.connected,
     load: async () => {
       try {
         const [recent, baseline] = await Promise.all([

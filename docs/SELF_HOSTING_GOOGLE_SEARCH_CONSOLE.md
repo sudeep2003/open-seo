@@ -23,13 +23,27 @@ It's **optional**: OpenSEO runs fine without it, just without Search Console dat
 
 Under **APIs & Services → OAuth consent screen**:
 
-- Pick **External** (unless everyone using it is in your Google Workspace org).
+- Pick **Internal** if everyone who will connect is in your Google Workspace
+  org. Otherwise pick **External**.
 - Fill in the app name, support email, and developer contact email.
 - While the app is in **Testing**, add the Google accounts that will connect as
   **test users** — otherwise Google blocks the sign-in with `access_denied`.
 
-For personal or internal use you don't need to submit for verification; testing
-mode is enough.
+**Publish the app so you don't have to reconnect every week.** While an External
+app's publishing status is **Testing**, Google expires its refresh tokens after
+7 days, so Search Console and Analytics stop working and ask you to reconnect
+weekly. To avoid this, open **Audience** (or **OAuth consent screen**) and click
+**Publish app** to move it to **In production**:
+
+- Fill in the app name, user support email, app home page, and privacy policy
+  link. Your OpenSEO URL works as the home page.
+- For personal use you don't need to submit the app for Google verification.
+  Google shows an "unverified app" warning the first time you connect; click
+  **Advanced**, then continue to your app.
+- After publishing, reconnect Google once. Connections made while the app was in
+  Testing keep their 7-day expiry.
+
+Apps with the **Internal** user type aren't affected by the 7-day limit.
 
 ## 3) Create an OAuth client ID
 
@@ -112,6 +126,11 @@ docker compose up -d --force-recreate open-seo
 **`access_denied` during sign-in** — the Google account isn't listed as a test
 user on the OAuth consent screen (while the app is in Testing mode). Add it under
 **OAuth consent screen → Test users**.
+
+**Asked to reconnect Google every week** — your OAuth consent screen is still in
+**Testing**, so Google expires the connection after 7 days. Publish the app to
+**In production** (see [step 2](#2-configure-the-oauth-consent-screen)), then
+reconnect once.
 
 **"Search Console API isn't enabled"** — the API isn't enabled in the Google
 Cloud project that owns your OAuth client. Enable it (step 1), wait a minute,
