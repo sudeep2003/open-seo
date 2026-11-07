@@ -21,6 +21,8 @@
   "placement": {
     "mode": "smart",
   },
+  "routes": [{ "pattern": "seo.sudeep.nl", "custom_domain": true }],
+  "workers_dev": true,
   "workflows": [
     // The site-audit engine lives in the open-seo-audit aux worker
     // (wrangler.audit.jsonc) — its memory spikes (multi-MB Lighthouse
